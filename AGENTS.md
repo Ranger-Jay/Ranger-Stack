@@ -9,6 +9,12 @@ designer, QA lead, release engineer, debugger, and more.
 Skills live in `.agents/skills/` (or `~/.claude/skills/gstack/` on Claude Code).
 Invoke them by name (e.g., `/office-hours`).
 
+### Ranger control plane
+
+| Skill | What it does |
+|-------|-------------|
+| `/ranger` | Explicit specialist selector and R0–R6 mission-authority gate for Ranger Stack. |
+
 ### Plan-mode reviews
 
 | Skill | What it does |

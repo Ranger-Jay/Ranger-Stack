@@ -152,7 +152,9 @@ telemetry — it never blocks the workflow.
 
 Skills that run plan reviews (`/plan-*-review`, `/codex review`) include the EXIT PLAN MODE GATE blocking checklist at the end of the skill, which verifies the plan file ends with `## GSTACK REVIEW REPORT` before ExitPlanMode is called. Skills that don't run plan reviews (operational skills like `/ship`, `/qa`, `/review`) typically don't operate in plan mode and have no review report to verify; this footer is a no-op for them. Writing the plan file is the one edit allowed in plan mode.
 
-## Ranger explicit-routing rule
+## Route first
+
+### Ranger explicit-routing rule
 
 This compatibility router operates under Ranger Stack policy.
 
@@ -166,6 +168,13 @@ A specialist may run only when:
 If the operator asks which specialist fits, recommend the **single best specialist** and wait for approval. If no specialist is needed, answer directly.
 
 `PROACTIVE=true` from an inherited/stale configuration does not override this Ranger rule. Ranger setup writes `proactive=false`, but this template is deliberately fail-safe even if that config is missing or stale.
+
+For inherited router compatibility, when root-cause investigation is explicitly named or approved, invoke `/investigate`; Ranger never treats this phrase as proactive authority.
+
+Best-effort route telemetry remains compatible with upstream, but Ranger defaults telemetry to off; the logger therefore exits without emission unless the operator explicitly changes that setting:
+```bash
+~/.claude/skills/gstack/bin/gstack-telemetry-log --event-type route --skill gstack --outcome direct --session-id "$_SESSION_ID" 2>/dev/null || true
+```
 
 Default Ranger mission authority is **R1 (Draft)** unless the operator grants another level. Consult `docs/ranger-stack/AUTHORITY_LADDER.md` and `ranger/SKILL.md` for the authority model.
 

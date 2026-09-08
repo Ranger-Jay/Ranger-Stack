@@ -1,7 +1,7 @@
 ---
 name: ranger
 version: 0.001
-description: Ranger authority and routing gate.
+description: gstack Ranger authority routing gate.
 allowed-tools:
   - Bash
   - Read

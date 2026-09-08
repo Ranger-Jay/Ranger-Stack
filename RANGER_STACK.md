@@ -36,11 +36,15 @@ The wrapper forces Ranger-safe defaults before and after inherited setup:
 - proactive routing off;
 - routing injection declined;
 - telemetry off;
-- artifact sync off;
+- artifact sync off and artifact-sync prompting treated as already handled;
 - automatic upgrades and update checks off;
-- continuous checkpoint/push off;
+- checkpoint mode explicit and checkpoint push off;
+- cross-project learning off;
 - plan-tune hooks off;
-- remote browser pairing off;
+- remote/pair-agent mode off;
+- founder-resource injection off;
+- question tuning off;
+- team mode off;
 - transcript ingestion off.
 
 ## Operator use
@@ -57,7 +61,9 @@ or:
 Ranger authority R4 for this hackathon mission. Run /investigate, then /review and /ship as needed. Do not exceed R4.
 ```
 
-Default authority is R1.
+Default authority is R1. Scope always beats level. Merge/deploy/release operations require explicit R5 authority, and destructive or materially irreversible R6 actions always require individual confirmation.
+
+The complete skill inventory and the exact slash command for every audited skill are documented in [`README.md`](README.md).
 
 ## Governance
 

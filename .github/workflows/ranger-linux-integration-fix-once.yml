@@ -41,7 +41,7 @@ jobs:
               raise SystemExit('expected ranger description not found')
           p.write_text(s.replace(old, new, 1))
 
-          # 2. Preserve the inherited router contract name while keeping
+          # 2. Preserve inherited router compatibility contracts while keeping
           # Ranger explicit-only semantics. Restore one best-effort telemetry
           # call; Ranger setup keeps telemetry tier off, so the logger no-ops.
           p = Path('SKILL.md.tmpl')
@@ -52,7 +52,7 @@ jobs:
               raise SystemExit('expected Ranger router heading not found')
           s = s.replace(old, new, 1)
           needle = '`PROACTIVE=true` from an inherited/stale configuration does not override this Ranger rule. Ranger setup writes `proactive=false`, but this template is deliberately fail-safe even if that config is missing or stale.\n'
-          insertion = needle + '\nBest-effort route telemetry remains compatible with upstream, but Ranger defaults telemetry to off; the logger therefore exits without emission unless the operator explicitly changes that setting:\n```bash\n~/.claude/skills/gstack/bin/gstack-telemetry-log --event-type route --skill gstack --outcome direct --session-id "$_SESSION_ID" 2>/dev/null || true\n```\n'
+          insertion = needle + '\nFor inherited router compatibility, when root-cause investigation is explicitly named or approved, invoke `/investigate`; Ranger never treats this phrase as proactive authority.\n\nBest-effort route telemetry remains compatible with upstream, but Ranger defaults telemetry to off; the logger therefore exits without emission unless the operator explicitly changes that setting:\n```bash\n~/.claude/skills/gstack/bin/gstack-telemetry-log --event-type route --skill gstack --outcome direct --session-id "$_SESSION_ID" 2>/dev/null || true\n```\n'
           if needle not in s:
               raise SystemExit('expected proactive compatibility paragraph not found')
           p.write_text(s.replace(needle, insertion, 1))

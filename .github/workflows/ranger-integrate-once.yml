@@ -48,7 +48,6 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          # Keep Ranger's catalog footprint inside the inherited discovery budget.
           p = Path('ranger/SKILL.md.tmpl')
           s = p.read_text()
           old = 'description: Explicit Ranger Stack specialist selector and mission-authority gate.'
@@ -57,7 +56,6 @@ jobs:
               raise SystemExit('expected Ranger description not found')
           p.write_text(s.replace(old, new, 1))
 
-          # Preserve inherited browser compatibility while keeping Ranger explicit-only.
           p = Path('SKILL.md.tmpl')
           s = p.read_text()
           needle = "Inherited skills remain physically present so upstream generators and runtime dependencies are not broken in v0.001. Presence does not equal Ranger endorsement."
@@ -66,7 +64,6 @@ jobs:
               raise SystemExit('expected root compatibility paragraph not found')
           p.write_text(s.replace(needle, replacement, 1))
 
-          # Register Ranger in the inherited coverage registry.
           p = Path('test/skill-coverage-matrix.ts')
           s = p.read_text()
           needle = "  'devex-review': { gate: ['test/skill-coverage-floor.test.ts'], periodic: [] },\n};"
@@ -75,7 +72,6 @@ jobs:
               raise SystemExit('expected skill coverage insertion point not found')
           p.write_text(s.replace(needle, replacement, 1))
 
-          # Pin the test to the approved authority language already present in the canonical doc.
           p = Path('test/ranger-policy.test.ts')
           s = p.read_text()
           old = 'expect(authority).toContain("always requires individual explicit confirmation");'
@@ -109,12 +105,11 @@ jobs:
             test/evals-workflow-wiring.test.ts \
             test/ci-image-tag-binding.test.ts
 
-      - name: Commit integration repair
+      - name: Commit non-workflow integration repair
         shell: bash
         run: |
           set -euo pipefail
           git add -- \
-            .github/workflows/evals.yml \
             SKILL.md.tmpl SKILL.md gstack/llms.txt \
             ranger/SKILL.md.tmpl ranger/SKILL.md \
             test/ranger-policy.test.ts \

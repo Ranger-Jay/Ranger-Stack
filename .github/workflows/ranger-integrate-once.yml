@@ -1,4 +1,4 @@
-name: Ranger One-Shot Integration Repair
+name: Ranger One-Shot E2E Candidate
 
 on:
   push:
@@ -10,9 +10,9 @@ permissions:
   contents: write
 
 jobs:
-  integrate:
+  export-candidate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
@@ -23,7 +23,7 @@ jobs:
         with:
           bun-version: 1.3.13
 
-      - name: Restore upstream E2E wiring but park PR trigger
+      - name: Build exact manual-only E2E candidate from upstream
         shell: bash
         run: |
           set -euo pipefail
@@ -40,86 +40,20 @@ jobs:
           p.write_text(s.replace(old, new, 1))
           PY
 
-      - name: Integrate Ranger as a generated skill
+      - name: Verify inherited E2E wiring remains intact
         shell: bash
         run: |
           set -euo pipefail
-          cp ranger/SKILL.md ranger/SKILL.md.tmpl
-          python - <<'PY'
-          from pathlib import Path
+          bun install --frozen-lockfile
+          bun test test/evals-workflow-wiring.test.ts test/ci-image-tag-binding.test.ts
 
-          p = Path('ranger/SKILL.md.tmpl')
-          s = p.read_text()
-          old = 'description: Explicit Ranger Stack specialist selector and mission-authority gate.'
-          new = 'description: Ranger authority and routing gate.'
-          if old not in s:
-              raise SystemExit('expected Ranger description not found')
-          p.write_text(s.replace(old, new, 1))
-
-          p = Path('SKILL.md.tmpl')
-          s = p.read_text()
-          needle = "Inherited skills remain physically present so upstream generators and runtime dependencies are not broken in v0.001. Presence does not equal Ranger endorsement."
-          replacement = "When the operator explicitly approves browser QA, invoke `/browse`; it uses Aside first with the inherited fallback path.\n\n" + needle
-          if needle not in s:
-              raise SystemExit('expected root compatibility paragraph not found')
-          p.write_text(s.replace(needle, replacement, 1))
-
-          p = Path('test/skill-coverage-matrix.ts')
-          s = p.read_text()
-          needle = "  'devex-review': { gate: ['test/skill-coverage-floor.test.ts'], periodic: [] },\n};"
-          replacement = "  'devex-review': { gate: ['test/skill-coverage-floor.test.ts'], periodic: [] },\n  ranger: {\n    gate: ['test/ranger-policy.test.ts', 'test/skill-coverage-floor.test.ts'],\n    periodic: [],\n    rationale: 'Ranger policy invariants plus generated-skill structural floor.',\n  },\n};"
-          if needle not in s:
-              raise SystemExit('expected skill coverage insertion point not found')
-          p.write_text(s.replace(needle, replacement, 1))
-
-          p = Path('test/ranger-policy.test.ts')
-          s = p.read_text()
-          old = 'expect(authority).toContain("always requires individual explicit confirmation");'
-          new = 'expect(authority).toContain("Each R6 action requires individual explicit confirmation");'
-          if old not in s:
-              raise SystemExit('expected Ranger R6 test assertion not found')
-          p.write_text(s.replace(old, new, 1))
-          PY
-
-      - name: Install frozen dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Generate skill docs and context-budget fixture
+      - name: Commit exact candidate under a temporary non-workflow path
         shell: bash
         run: |
           set -euo pipefail
-          bun run gen:skill-docs --host all
-          bun test/helpers/capture-context-budget.ts
-
-      - name: Run targeted Ranger integration gates
-        shell: bash
-        run: |
-          set -euo pipefail
-          bun test \
-            test/ranger-policy.test.ts \
-            test/catalog-budget.test.ts \
-            test/context-budget-ratchet.test.ts \
-            test/skill-coverage-matrix.test.ts \
-            test/skill-coverage-floor.test.ts \
-            test/aside-driver.test.ts \
-            test/evals-workflow-wiring.test.ts \
-            test/ci-image-tag-binding.test.ts
-
-      - name: Commit non-workflow integration repair
-        shell: bash
-        run: |
-          set -euo pipefail
-          git add -- \
-            SKILL.md.tmpl SKILL.md gstack/llms.txt \
-            ranger/SKILL.md.tmpl ranger/SKILL.md \
-            test/ranger-policy.test.ts \
-            test/skill-coverage-matrix.ts \
-            test/fixtures/context-budget.json
-          if git diff --cached --quiet; then
-            echo "No integration changes required."
-            exit 0
-          fi
+          cp .github/workflows/evals.yml ranger/evals.manual.candidate.yml
+          git add -- ranger/evals.manual.candidate.yml
           git config user.name "Ranger Stack CI"
           git config user.email "actions@users.noreply.github.com"
-          git commit -m "fix: conform Ranger v0.001 to upstream CI contracts"
+          git commit -m "ci: export tested manual E2E workflow candidate"
           git push origin HEAD:ranger/v0.001

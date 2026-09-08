@@ -25,6 +25,8 @@ apply_ranger_defaults() {
   "$CFG" set checkpoint_mode explicit
   "$CFG" set checkpoint_push false
   "$CFG" set artifacts_sync_mode off
+  "$CFG" set artifacts_sync_mode_prompted true
+  "$CFG" set cross_project_learnings false
   "$CFG" set plan_tune_hooks no
   "$CFG" set pair_agent off
   "$CFG" set founder_resources false
@@ -47,6 +49,7 @@ printf '%s\n' \
   "  proactive routing: off" \
   "  telemetry: off" \
   "  artifact sync: off" \
+  "  cross-project learnings: off" \
   "  automatic upgrades/checks: off" \
   "  continuous checkpoint push: off" \
   "  remote browser pairing: off" \

@@ -7,6 +7,7 @@ Ranger Stack v0.001 is derived from `garrytan/gstack` at a fixed, reproducible u
 - Upstream commit: `0530392821c277b95e5cd65aa9d9fda4248718b2`
 - Ranger fork: `Ranger-Jay/Ranger-Stack`
 - Anchor date: 2026-09-08
+- Fork GitHub Actions enabled: 2026-09-08
 
 Future upstream changes are not adopted automatically. They must pass a Ranger upstream audit before incorporation.
 

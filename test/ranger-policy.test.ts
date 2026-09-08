@@ -42,7 +42,7 @@ describe("Ranger Stack policy invariants", () => {
   test("authority ladder preserves irreversible-action confirmation", () => {
     const authority = read("docs/ranger-stack/AUTHORITY_LADDER.md");
     expect(authority).toContain("R6 | One-Way");
-    expect(authority).toContain("always requires individual explicit confirmation");
+    expect(authority).toContain("Each R6 action requires individual explicit confirmation");
     expect(authority).toContain("Scope beats level");
   });
 

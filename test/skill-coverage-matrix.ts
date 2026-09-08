@@ -216,4 +216,9 @@ export const SKILL_COVERAGE: Record<string, SkillCoverage> = {
     rationale: 'make-pdf is a binary with its own free suite under make-pdf/test/ (print pipeline via lib/aside-render.ts); the skill doc is structure-checked by the floor.',
   },
   'devex-review': { gate: ['test/skill-coverage-floor.test.ts'], periodic: [] },
+  ranger: {
+    gate: ['test/ranger-policy.test.ts', 'test/skill-coverage-floor.test.ts'],
+    periodic: [],
+    rationale: 'Ranger policy invariants plus generated-skill structural floor.',
+  },
 };

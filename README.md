@@ -32,6 +32,8 @@ Ranger Stack adds a policy and verification layer on top of the inherited gstack
 
 The canonical policy documents are in [`docs/ranger-stack/`](docs/ranger-stack/).
 
+> **Ranger precedence:** inherited gstack deep-dive documentation describes the underlying mechanics. Where an inherited description conflicts with this README, the Ranger intake manifest, authority ladder, or operating doctrine, **Ranger policy governs**. In particular, inherited wording such as “auto-fix,” “one command,” automatic memory/taste updates, self-upgrade, issue filing, spawning, push, merge, or deploy never overrides Ranger authority gates.
+
 ---
 
 ## Install

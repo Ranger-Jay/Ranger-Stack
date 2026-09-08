@@ -1,0 +1,42 @@
+name: Ranger One-Shot Generated Docs
+
+# Temporary branch-only helper for Ranger v0.001 integration.
+# It runs only when this workflow file itself is added/changed on ranger/v0.001,
+# regenerates the two tracked outputs identified by Skill Docs Freshness, commits
+# only those paths, and therefore does not retrigger itself on its generated commit.
+on:
+  push:
+    branches: [ranger/v0.001]
+    paths:
+      - .github/workflows/ranger-regenerate-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ranger/v0.001
+          fetch-depth: 1
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - run: bun install --frozen-lockfile
+      - name: Generate tracked outputs
+        run: bun run gen:skill-docs --host all
+      - name: Commit only tracked generated outputs
+        run: |
+          set -euo pipefail
+          git add -- SKILL.md gstack/llms.txt
+          if git diff --cached --quiet; then
+            echo "Tracked generated outputs already fresh."
+            exit 0
+          fi
+          git config user.name "Ranger Stack CI"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "build: regenerate Ranger tracked skill docs"
+          git push origin HEAD:ranger/v0.001

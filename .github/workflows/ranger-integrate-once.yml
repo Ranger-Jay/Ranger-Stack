@@ -57,11 +57,11 @@ jobs:
               raise SystemExit('expected Ranger description not found')
           p.write_text(s.replace(old, new, 1))
 
-          # Preserve the inherited literal compatibility contract while remaining explicit-only.
+          # Preserve inherited browser compatibility while keeping Ranger explicit-only.
           p = Path('SKILL.md.tmpl')
           s = p.read_text()
           needle = "Inherited skills remain physically present so upstream generators and runtime dependencies are not broken in v0.001. Presence does not equal Ranger endorsement."
-          replacement = "When the operator explicitly approves browser QA, invoke `/browse`.\n\n" + needle
+          replacement = "When the operator explicitly approves browser QA, invoke `/browse`; it uses Aside first with the inherited fallback path.\n\n" + needle
           if needle not in s:
               raise SystemExit('expected root compatibility paragraph not found')
           p.write_text(s.replace(needle, replacement, 1))
@@ -74,6 +74,15 @@ jobs:
           if needle not in s:
               raise SystemExit('expected skill coverage insertion point not found')
           p.write_text(s.replace(needle, replacement, 1))
+
+          # Pin the test to the approved authority language already present in the canonical doc.
+          p = Path('test/ranger-policy.test.ts')
+          s = p.read_text()
+          old = 'expect(authority).toContain("always requires individual explicit confirmation");'
+          new = 'expect(authority).toContain("Each R6 action requires individual explicit confirmation");'
+          if old not in s:
+              raise SystemExit('expected Ranger R6 test assertion not found')
+          p.write_text(s.replace(old, new, 1))
           PY
 
       - name: Install frozen dependencies
@@ -108,6 +117,7 @@ jobs:
             .github/workflows/evals.yml \
             SKILL.md.tmpl SKILL.md gstack/llms.txt \
             ranger/SKILL.md.tmpl ranger/SKILL.md \
+            test/ranger-policy.test.ts \
             test/skill-coverage-matrix.ts \
             test/fixtures/context-budget.json
           if git diff --cached --quiet; then

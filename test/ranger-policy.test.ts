@@ -28,6 +28,8 @@ describe("Ranger Stack policy invariants", () => {
       'set checkpoint_mode explicit',
       'set checkpoint_push false',
       'set artifacts_sync_mode off',
+      'set artifacts_sync_mode_prompted true',
+      'set cross_project_learnings false',
       'set plan_tune_hooks no',
       'set pair_agent off',
       'set transcript_ingest_mode off',

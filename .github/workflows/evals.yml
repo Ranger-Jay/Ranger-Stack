@@ -1,7 +1,5 @@
 name: E2E Evals
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
     inputs:
       evals_all:

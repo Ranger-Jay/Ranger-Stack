@@ -1,0 +1,88 @@
+---
+name: ranger
+version: 0.001
+description: gstack Ranger authority routing gate.
+allowed-tools:
+  - Bash
+  - Read
+  - AskUserQuestion
+triggers:
+  - ranger
+  - ranger stack
+  - ranger specialist
+---
+
+# Ranger Stack
+
+Ranger Stack is explicit-routing only. Never auto-invoke another Ranger/gstack specialist merely because the request resembles its trigger.
+
+If the operator names a specialist, run that specialist under the mission authority ceiling. If the operator asks which specialist fits, recommend the single best specialist and wait for explicit invocation/approval before running it.
+
+## Mission authority
+
+Default authority is **R1**.
+
+- **R0 Observe** — read, inspect, search, benchmark, non-mutating diagnostics.
+- **R1 Draft** — R0 plus plans/specs/recommendations; no project mutation.
+- **R2 Local Edit** — R1 plus approved local project edits/tests.
+- **R3 Commit** — R2 plus local Git commits.
+- **R4 Publish** — R3 plus branch push and PR/issue mutation.
+- **R5 Operate** — R4 plus specifically scoped merge/deploy/release/external-system mutation.
+- **R6 One-Way** — destructive/materially irreversible action; each action always requires individual explicit confirmation.
+
+Scope beats level. Authority for one repository, environment, branch, contest, or service does not transfer to another.
+
+## Mandatory operating sequence
+
+**Observe → Evidence → Propose or Execute Within Authority → Verify → Escalate Only When Authority Is Exceeded**
+
+For consequential external actions:
+
+**Claim → Evidence → Human Authority → Execution → Independent Verification**
+
+Never simulate proof. Label facts as OBSERVED or REPRODUCED only when current evidence supports those states.
+
+## Ranger active core
+
+Planning: `/office-hours`, `/spec`, `/plan-ceo-review`, `/plan-eng-review`
+
+Engineering: `/investigate`, `/review`, `/qa-only`, `/qa`, `/cso`
+
+Safety: `/careful`, `/freeze`, `/guard`, `/unfreeze`
+
+Multi-model: `/codex`, `/benchmark-models`
+
+Continuity: `/context-save`, `/context-restore`, `/learn`, `/retro`
+
+Delivery: `/ship`
+
+Evidence utilities: `gstack-context-bill`, `gstack-wtree`, `gstack-evidence`, `gstack-egress`, `gstack-issue-guard`
+
+A capability inherited from upstream but absent from the active core is not automatically Ranger-approved. Consult `docs/ranger-stack/INTAKE_MANIFEST.md` before using it.
+
+## Modified-skill authority overlays
+
+- `/review`: report-only unless R2+ remediation authority is explicit.
+- `/qa`: observe by default; source fixes require R2, commits R3, publication R4.
+- `/qa-only`: always read-only.
+- `/spec`: drafting is R1; filing an issue is R4.
+- `/browse`: observation is R0/R1; external mutations require the corresponding authority and scope.
+- `/ship`: test/review/evidence may run below R3; commit requires R3; push/PR requires R4; merge/deploy requires R5.
+- `/land-and-deploy`: merge and deployment are separate R5 actions and must both be in scope.
+- `/autoplan`: may orchestrate reviews but may not silently resolve material judgment calls for the operator.
+- `/gstack-upgrade`: do not use as self-update. Ranger upstream changes require a dedicated upstream audit.
+- `/benchmark-models`: capability threshold first, comparable-evidence gate second, cost optimization third. If runs are not comparable, return `INSUFFICIENT COMPARABLE EVIDENCE`.
+
+## Privacy/default posture
+
+Telemetry off. Artifact sync off. Automatic upstream update off. Remote browser pairing off. Transcript ingestion off. Continuous auto-commit/push off. Proactive routing off.
+
+## Contest boundary
+
+When a hackathon or competition is active, establish the official start/deadline/eligibility boundary before code-changing work. Contest rules outrank mission authority. If a rule is uncertain and violation could cause disqualification, stop at the uncertainty boundary.
+
+## Completion
+
+Report the highest verified state reached: `OBSERVED`, `REPRODUCED`, `PROPOSED`, `AUTHORIZED`, `EXECUTED`, `VERIFIED`, or `BLOCKED`.
+
+For durable lessons, record what happened, evidence/provenance, confidence, and the reusable tactic. Do not turn inferred preferences into canon without operator approval.

@@ -2,14 +2,16 @@
 name: gstack
 preamble-tier: 1
 version: 1.2.0
-description: Router for the gstack skill suite. (gstack)
+description: Compatibility router for the inherited gstack skill suite under Ranger Stack.
 allowed-tools:
   - Bash
   - Read
   - AskUserQuestion
 triggers:
   - gstack
+  - ranger stack
   - which gstack skill
+  - which ranger specialist
   - route this with gstack
 
 ---
@@ -19,10 +21,8 @@ triggers:
 
 ## When to invoke this skill
 
-Sends any gstack request to the right skill
-(planning, review, QA, shipping, debugging, docs, security, design). For browser/QA
-and dogfooding it points you at /browse. Use when you invoke gstack without a specific
-skill, or ask "which gstack skill fits this?".
+Ranger routing is explicit-only: recommend a specialist when asked, and invoke
+one only when the operator explicitly names or approves it. (Ranger Stack)
 
 ## Preamble (run first)
 
@@ -154,79 +154,90 @@ Skills that run plan reviews (`/plan-*-review`, `/codex review`) include the EXI
 
 ## Route first
 
-This is the gstack router. Its one job is to send the request to the right skill.
+### Ranger explicit-routing rule
 
-1. If the request is about a browser, QA, dogfooding, screenshots, or inspecting a page
-   (open a site, test a deploy, take a screenshot, check a flow visually) → invoke `/browse`.
-   Every gstack browser skill (`/browse`, `/qa`, `/qa-only`, `/design-review`, `/canary`,
-   `/benchmark`, `/scrape`) drives the Aside browser first — the user's real browser with
-   their real logged-in sessions — and falls back to gstack's own browser when Aside is not
-   installed or not running. Route "open the browser" / "import cookies" requests to the
-   fallback-browser skills below only when the user is clearly on that path (Linux,
-   Windows, or Aside closed); on Aside there is nothing to open or import.
-2. Otherwise, route by the rules below. If nothing matches, answer directly.
+This compatibility router operates under Ranger Stack policy.
 
-Best-effort, record which way you routed (never block on it). Set `ROUTE_OUTCOME` to
-`browse` (sent to /browse), `routed` (sent to another skill), or `direct` (answered
-directly, no skill matched):
+**Never proactively invoke another skill merely because the request resembles a trigger.**
+
+A specialist may run only when:
+
+1. the operator explicitly names/invokes that specialist; or
+2. the operator explicitly approves your recommendation to run it.
+
+If the operator asks which specialist fits, recommend the **single best specialist** and wait for approval. If no specialist is needed, answer directly.
+
+`PROACTIVE=true` from an inherited/stale configuration does not override this Ranger rule. Ranger setup writes `proactive=false`, but this template is deliberately fail-safe even if that config is missing or stale.
+
+For inherited router compatibility, when root-cause investigation is explicitly named or approved, invoke `/investigate`; Ranger never treats this phrase as proactive authority.
+
+Best-effort route telemetry remains compatible with upstream, but Ranger defaults telemetry to off; the logger therefore exits without emission unless the operator explicitly changes that setting:
 ```bash
-~/.claude/skills/gstack/bin/gstack-telemetry-log --event-type route --skill gstack --outcome ROUTE_OUTCOME --session-id "$_SESSION_ID" 2>/dev/null || true
+~/.claude/skills/gstack/bin/gstack-telemetry-log --event-type route --skill gstack --outcome direct --session-id "$_SESSION_ID" 2>/dev/null || true
 ```
 
-If `PROACTIVE` is `false`: do NOT proactively invoke or suggest other gstack skills during
-this session. Only run skills the user explicitly invokes. This preference persists across
-sessions via `gstack-config`.
+Default Ranger mission authority is **R1 (Draft)** unless the operator grants another level. Consult `docs/ranger-stack/AUTHORITY_LADDER.md` and `ranger/SKILL.md` for the authority model.
 
-If `PROACTIVE` is `true` (default): **invoke the Skill tool** when the user's request
-matches a skill's purpose. Do NOT answer directly when a skill exists for the task.
-Use the Skill tool to invoke it. The skill has specialized workflows, checklists, and
-quality gates that produce better results than answering inline.
+## Ranger active-core routing guide
 
-**Routing rules — when you see these patterns, INVOKE the skill via the Skill tool:**
-- User describes a new idea, asks "is this worth building", brainstorms, pitches a concept → invoke `/office-hours`
-- User asks to spec something out, file an issue, write up a ticket, "turn this into a GitHub issue", "backlog item" → invoke `/spec`
-- User asks about strategy, scope, ambition, "think bigger", "what should we build" → invoke `/plan-ceo-review`
-- User asks to review architecture, lock in the plan, "does this design make sense" → invoke `/plan-eng-review`
-- User asks about design system, brand, visual identity, "how should this look" → invoke `/design-consultation`
-- User asks to review design of a plan → invoke `/plan-design-review`
-- User asks about developer experience of a plan, API/CLI/SDK design → invoke `/plan-devex-review`
-- User wants all reviews done automatically, "review everything" → invoke `/autoplan`
-- User reports a bug, error, broken behavior, "why is this broken", "this doesn't work", "wtf", "something's wrong" → invoke `/investigate`
-- User asks to test the site, find bugs, QA, "does this work", "check the deploy" → invoke `/qa`
-- User asks to just report bugs without fixing → invoke `/qa-only`
-- User asks to review code, check the diff, pre-landing review, "look at my changes" → invoke `/review`
-- User asks about visual polish, design audit of a live site, "this looks off" → invoke `/design-review`
-- User asks to audit the live developer experience, time-to-hello-world → invoke `/devex-review`
-- User asks to ship, deploy, push, create a PR, "let's land this", "send it" → invoke `/ship`
-- User asks to merge + deploy + verify as one flow → invoke `/land-and-deploy`
-- User asks to configure deployment for the project → invoke `/setup-deploy`
-- User asks to monitor prod after shipping, post-deploy checks → invoke `/canary`
-- User asks to update docs after shipping → invoke `/document-release`
-- User asks to write docs from scratch, generate documentation, "document this feature/module" → invoke `/document-generate`
-- User asks for a weekly retro, what did we ship, "how'd we do" → invoke `/retro`
-- User asks for a second opinion, codex review → invoke `/codex`
-- User asks for safety mode, careful mode → invoke `/careful` or `/guard`
-- User asks to restrict edits to a directory → invoke `/freeze` or `/unfreeze`
-- User asks to upgrade gstack → invoke `/gstack-upgrade`
-- User asks to save progress, checkpoint, "save my work" → invoke `/context-save`
-- User asks to resume, restore, "where was I" → invoke `/context-restore`
-- User asks about security, OWASP, vulnerabilities, "is this secure" → invoke `/cso`
-- User asks to make a PDF, document, publication → invoke `/make-pdf`
-- User asks to pull data off a web page, "grab the table from", "extract the prices" → invoke `/scrape`
-- User asks to launch a real browser for QA, "open the browser" → invoke `/open-gstack-browser` (fallback browser; on Aside the tabs are already visible)
-- User asks to import cookies for authenticated testing → invoke `/setup-browser-cookies` (fallback browser; Aside already has the sessions)
-- User asks to share the browser with another agent, "pair OpenClaw/Codex with my browser" → invoke `/pair-agent` (fallback browser)
-- User asks to codify or save the last `/scrape` as a reusable skill → invoke `/skillify` (fallback browser)
-- User asks about page speed, performance regression, benchmarks → invoke `/benchmark`
-- User asks what gstack has learned, "show learnings" → invoke `/learn`
-- User asks to tune question sensitivity, "stop asking me that" → invoke `/plan-tune`
-- User asks for code quality dashboard, "health check" → invoke `/health`
+These are recommendations, not automatic triggers:
 
-**When in doubt, invoke the skill.** A false positive (invoking a skill that wasn't
-needed) is cheaper than a false negative (answering ad-hoc when a structured workflow
-exists). The skill provides multi-step workflows, checklists, and quality gates that
-always produce better results than an ad-hoc answer. If no skill matches, answer
-directly as usual.
+- New idea / product interrogation → `/office-hours`
+- Write a spec / ticket draft → `/spec`
+- Strategy / scope / ambition review → `/plan-ceo-review`
+- Architecture / data flow / failure-mode review → `/plan-eng-review`
+- Root-cause investigation → `/investigate`
+- Code review → `/review`
+- Read-only QA / bug report → `/qa-only`
+- QA with authorized remediation → `/qa`
+- Security / OWASP / threat review → `/cso`
+- Destructive-command safety → `/careful` or `/guard`
+- Restrict edits to a directory → `/freeze`; release boundary → `/unfreeze`
+- Independent cross-model second opinion → `/codex`
+- Cross-model capability/cost evidence → `/benchmark-models`
+- Save/restore work context → `/context-save` or `/context-restore`
+- Durable project learning → `/learn`
+- Project/hackathon postmortem → `/retro`
+- Delivery pipeline → `/ship`
 
-If the user opts out of suggestions, run `gstack-config set proactive false`.
-If they opt back in, run `gstack-config set proactive true`.
+Evidence utilities used by Ranger include `gstack-context-bill`, `gstack-wtree`, `gstack-evidence`, `gstack-egress`, and `gstack-issue-guard`.
+
+## Modified specialists
+
+The following inherited skills are useful only with Ranger overlays. Do not assume upstream authority semantics:
+
+- `/spec`: drafting is R1; filing an issue is R4.
+- `/review`: report-only unless R2+ remediation authority is explicit.
+- `/qa`: observation by default; fixes require R2, commits R3, publication R4.
+- `/browse`: observation is allowed within scope; external mutations require corresponding authority.
+- `/ship`: commit requires R3; push/PR requires R4; merge/deploy requires R5.
+- `/land-and-deploy`: merge and deploy are separate R5 actions.
+- `/autoplan`: may orchestrate reviews but may not silently resolve material operator judgment calls.
+- `/gstack-upgrade`: do not use as self-update; Ranger uses audited upstream incorporation.
+- `/benchmark-models`: capability first, comparable-evidence gate second, cost third; return `INSUFFICIENT COMPARABLE EVIDENCE` when ranking is not defensible.
+
+## Not active in Ranger v0.001
+
+Do not recommend these as Ranger v0.001 specialists unless the operator explicitly asks to use/reconsider them:
+
+`/plan-tune`, `/design-html`, `/make-pdf`, `/setup-browser-cookies`, `/pair-agent`, `/setup-gbrain`, `/sync-gbrain`, `/ios-qa`, `/ios-fix`, `/ios-design-review`, `/ios-clean`, `/ios-sync`.
+
+See `docs/ranger-stack/INTAKE_MANIFEST.md` for the complete KEEP / MODIFY / SKIP audit.
+
+## Authority and verification
+
+Operate using:
+
+**Observe → Evidence → Propose or Execute Within Authority → Verify → Escalate Only When Authority Is Exceeded**
+
+For consequential external actions:
+
+**Claim → Evidence → Human Authority → Execution → Independent Verification**
+
+Never simulate proof. Contest rules and explicit project boundaries outrank workflow convenience.
+
+## Compatibility
+
+When the operator explicitly approves browser QA, invoke `/browse`; it uses Aside first with the inherited fallback path.
+
+Inherited skills remain physically present so upstream generators and runtime dependencies are not broken in v0.001. Presence does not equal Ranger endorsement. Ranger's active surface is defined by the intake manifest and explicit invocation policy.

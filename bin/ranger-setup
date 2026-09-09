@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Ranger Stack setup wrapper.
+# Applies Ranger-safe defaults before and after the inherited gstack installer.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
+CFG="$ROOT/bin/gstack-config"
+UPSTREAM_SETUP="$ROOT/setup"
+
+if [ ! -x "$CFG" ]; then
+  echo "Ranger Stack: missing executable $CFG" >&2
+  exit 1
+fi
+if [ ! -x "$UPSTREAM_SETUP" ]; then
+  echo "Ranger Stack: missing executable $UPSTREAM_SETUP" >&2
+  exit 1
+fi
+
+apply_ranger_defaults() {
+  "$CFG" set proactive false
+  "$CFG" set routing_declined true
+  "$CFG" set telemetry off
+  "$CFG" set auto_upgrade false
+  "$CFG" set update_check false
+  "$CFG" set checkpoint_mode explicit
+  "$CFG" set checkpoint_push false
+  "$CFG" set artifacts_sync_mode off
+  "$CFG" set artifacts_sync_mode_prompted true
+  "$CFG" set cross_project_learnings false
+  "$CFG" set plan_tune_hooks no
+  "$CFG" set pair_agent off
+  "$CFG" set founder_resources false
+  "$CFG" set question_tuning false
+  "$CFG" set team_mode false
+  "$CFG" set transcript_ingest_mode off
+}
+
+echo "Ranger Stack: applying explicit-routing/privacy-safe defaults..."
+apply_ranger_defaults
+
+"$UPSTREAM_SETUP" "$@"
+
+# Reassert after upstream setup in case installation/migration logic introduced defaults.
+apply_ranger_defaults
+
+echo
+printf '%s\n' \
+  "Ranger Stack installed." \
+  "  proactive routing: off" \
+  "  telemetry: off" \
+  "  artifact sync: off" \
+  "  cross-project learnings: off" \
+  "  automatic upgrades/checks: off" \
+  "  continuous checkpoint push: off" \
+  "  remote browser pairing: off" \
+  "  transcript ingestion: off" \
+  "Default mission authority: R1 (Draft)." \
+  "Invoke specialists explicitly; use /ranger for the Ranger policy/selector."

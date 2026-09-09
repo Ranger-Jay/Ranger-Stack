@@ -1,147 +1,201 @@
-# gstack — AI Engineering Workflow
+# Ranger Stack — AI Engineering Workflow
 
-gstack is a collection of SKILL.md files that give AI agents structured roles for
-software development. Each skill is a specialist: CEO reviewer, eng manager,
-designer, QA lead, release engineer, debugger, and more.
+Ranger Stack is an evidence-first, authority-scoped specialist stack for AI-assisted software work.
 
-## Available skills
+It is derived from `garrytan/gstack`, but Ranger changes the operating contract around the inherited tools: specialists are explicit-only, authority is bounded, evidence precedes claims, consequential actions require the appropriate human authority, and completed work is independently verified.
 
-Skills live in `.agents/skills/` (or `~/.claude/skills/gstack/` on Claude Code).
-Invoke them by name (e.g., `/office-hours`).
+## Primary OpenAI workflow
 
-### Plan-mode reviews
+Ranger Stack is provider-neutral, but the primary documented OpenAI coding-host workflow is **Codex**, with **ChatGPT** used for planning, review, coordination, research, and repository work where the relevant connected tools are available.
 
-| Skill | What it does |
-|-------|-------------|
-| `/office-hours` | Start here. Reframes your product idea before you write code. |
-| `/plan-ceo-review` | CEO-level review: find the 10-star product in the request. |
-| `/plan-eng-review` | Lock architecture, data flow, edge cases, and tests. |
-| `/plan-design-review` | Rate each design dimension 0-10, explain what a 10 looks like. |
-| `/plan-devex-review` | DX-mode review: TTHW, magical moments, friction points, persona traces. |
-| `/plan-tune` | Self-tune AskUserQuestion sensitivity per question. |
-| `/autoplan` | One command runs CEO → design → DX → eng review (eng always last). |
-| `/design-consultation` | Build a complete design system from scratch. |
-| `/spec` | Turn vague intent into a precise, executable spec in five phases. Files a GitHub issue, optionally spawns a Claude Code agent in a fresh worktree, and lets `/ship` close the source issue on merge. |
-
-### Implementation + review
-
-| Skill | What it does |
-|-------|-------------|
-| `/review` | Pre-landing PR review. Finds bugs that pass CI but break in prod. |
-| `/codex` | Second opinion via OpenAI Codex. Review, challenge, or consult modes. |
-| `/investigate` | Systematic root-cause debugging. No fixes without investigation. |
-| `/design-review` | Live-site visual audit + fix loop with atomic commits. |
-| `/design-shotgun` | Generate multiple AI design variants, comparison board, iterate. |
-| `/design-html` | Generate production-quality Pretext-native HTML/CSS. |
-| `/devex-review` | Live developer experience audit (TTHW measured against the real flow). |
-| `/qa` | Open a real browser, find bugs, fix them, re-verify. |
-| `/qa-only` | Same methodology as /qa but report only — no code changes. |
-| `/scrape` | Pull data from a web page in your Aside browser, with your real logged-in state. Read-only. On the fallback browser a codified browser-skill answers a repeat intent in ~200ms. |
-| `/skillify` | Codify the most recent successful `/scrape` flow into a permanent browser-skill (fallback browser only). |
-
-### Release + deploy
-
-| Skill | What it does |
-|-------|-------------|
-| `/ship` | Run tests, review, push, open PR. Workspace-aware version queue. |
-| `/land-and-deploy` | Merge the PR, wait for CI and deploy, verify production health. |
-| `/canary` | Post-deploy monitoring loop in your Aside browser (or gstack's own when Aside is absent). |
-| `/landing-report` | Read-only dashboard for the workspace-aware ship queue. |
-| `/document-release` | Update all docs to match what you just shipped. |
-| `/document-generate` | Generate Diataxis docs (tutorial / how-to / reference / explanation) from code. |
-| `/setup-deploy` | One-time deploy config detection (Fly.io, Render, Vercel, etc.). |
-| `/gstack-upgrade` | Update gstack to the latest version. |
-
-### Operational + memory
-
-| Skill | What it does |
-|-------|-------------|
-| `/context-save` | Save working context (git state, decisions, remaining work). |
-| `/context-restore` | Resume from a saved context, even across Conductor workspaces. |
-| `/learn` | Manage what gstack learned across sessions. |
-| `/retro` | Weekly retro with per-person breakdowns and shipping streaks. |
-| `/health` | Code quality dashboard (type checker, linter, tests, dead code). |
-| `/benchmark` | Performance regression detection (page load, Core Web Vitals). |
-| `/benchmark-models` | Cross-model benchmark for skills (Claude, GPT, Gemini side-by-side). |
-| `/cso` | OWASP Top 10 + STRIDE security audit. |
-| `/setup-gbrain` | Set up gbrain for cross-machine session memory sync. |
-| `/sync-gbrain` | Keep gbrain current with this repo's code; refresh agent search guidance in CLAUDE.md. |
-
-### Browser + agent integration
-
-Every browser skill drives the Aside AI browser first (macOS 15+, aside.com) —
-the user's real browser with their real sessions, through `aside repl` scripts;
-gstack never installs it. When Aside is not installed or not running (Linux,
-Windows, a closed Aside app) the same skills fall back automatically to gstack's
-own headless Chromium (`$B`), which is where the three skills under `/browse` apply.
-
-| Skill | What it does |
-|-------|-------------|
-| `/browse` | Drive a browser: open a page, read it, click through a flow, screenshots, console errors. Aside first; gstack's own Chromium (~100ms/command) as the fallback. Every other browser skill stands on it. |
-| `/open-gstack-browser` | Launch the visible GStack Browser with sidebar + stealth — the headed face of the fallback engine. |
-| `/setup-browser-cookies` | Import cookies from your real browser into the fallback engine for authenticated testing. Unnecessary on Aside. |
-| `/pair-agent` | Pair a remote AI agent (OpenClaw, Codex, etc.) with gstack's own browser over a scoped tunnel. |
-
-### iOS QA — drive real iPhones over USB or Tailscale (v1.43.0.0+)
-
-| Skill | What it does |
-|-------|-------------|
-| `/ios-qa` | Live-device iOS QA via USB CoreDevice tunnel + embedded StateServer. Optionally exposes the device over Tailscale so remote agents can drive it. |
-| `/ios-fix` | Autonomous iOS bug fixer with regression snapshot capture. |
-| `/ios-design-review` | Designer's-eye QA on a real iPhone — 10-dimension Apple HIG rubric. |
-| `/ios-clean` | Convenience: strip DebugBridge + #if DEBUG wiring before a Release build. |
-| `/ios-sync` | Regenerate the iOS debug bridge against the latest upstream templates. |
-
-Companion CLIs (run on the Mac that's plugged into the device):
-
-| Command | What it does |
-|---------|-------------|
-| `gstack-ios-qa-daemon` | Mac-side broker. Loopback by default; `--tailnet` adds a Tailscale-facing listener with capability tiers and audit logging. |
-| `gstack-ios-qa-mint` | Owner-grant CLI for the tailnet allowlist (`grant`/`revoke`/`list`). |
-| `gstack-ios-qa-regen` | Regenerate the canonical local DebugBridge package and typed accessors (`--app-source` / `--bridge-dir`). |
-
-End-to-end walkthrough: [docs/howto-ios-testing-with-gstack.md](docs/howto-ios-testing-with-gstack.md).
-
-### Safety + scoping
-
-| Skill | What it does |
-|-------|-------------|
-| `/careful` | Warn before destructive commands (rm -rf, DROP TABLE, force-push). |
-| `/freeze` | Lock edits to one directory. Hard block, not just a warning. |
-| `/guard` | Activate both careful + freeze at once. |
-| `/unfreeze` | Remove directory edit restrictions. |
-| `/make-pdf` | Turn any markdown file into a publication-quality PDF. Renders through Aside, or gstack's own browser when Aside is absent. |
-| `/diagram` | English in, diagram out: mermaid source + editable .excalidraw + SVG/PNG, offline. Renders through Aside, or gstack's own browser when Aside is absent. |
-
-## Build commands
+For a Codex-oriented installation, use the Ranger wrapper rather than invoking the inherited setup directly:
 
 ```bash
-bun install              # install dependencies
-bun run test             # run free tests via the strict shard runner (no API spend, ~90-100s)
-bun run test:windows     # curated Windows-safe subset (runs on windows-latest)
-bun run build            # generate docs + compile binaries
-bun run gen:skill-docs   # regenerate SKILL.md files from templates
-bun run skill:check      # health dashboard for all skills
+bash bin/ranger-setup --host codex
 ```
 
-## Platform support
+Then invoke the Ranger control plane explicitly:
 
-- **macOS** + **Linux**: full test suite supported.
-- **Windows**: curated Windows-safe subset runs on `windows-latest` via the
-  `windows-free-tests` CI job. Setup script (`./setup`) requires Git Bash or
-  MSYS today; native PowerShell support is a future expansion. The `bin/gstack-paths`
-  helper resolves state roots through `CLAUDE_PLUGIN_DATA` / `GSTACK_HOME` so plugin
-  installs work on every platform.
-- **Browser and renderer**: the browser skills, `/make-pdf`, and `/diagram` drive
-  the Aside browser first, which is macOS 15+ only. On Linux and Windows (or a
-  Mac with Aside closed) the readiness check says so once and the same skills use
-  gstack's own bundled browser, built by `./setup`.
+```text
+/ranger
+```
 
-## Key conventions
+Ask Ranger for the single best specialist when you are unsure which command fits. Ranger recommends one and waits for approval; it does not silently auto-route.
 
-- SKILL.md files are **generated** from `.tmpl` templates. Edit the template, not the output.
-- Run `bun run gen:skill-docs --host codex` to regenerate Codex-specific output.
-- Browser steps in skills are `aside repl` scripts per `scripts/resolvers/aside.ts` (Aside first), each with a `$B` equivalent for the fallback engine — `$B <command>` is the browse binary and is a legitimate tool when the Aside probe does not print `READY`. Local HTML renders through `bin/gstack-render.ts`, which picks the same way.
-- Safety skills (careful, freeze, guard) use inline advisory prose — always confirm before destructive operations.
-- State paths resolve via `bin/gstack-paths` (sourced via `eval "$(...)"`). Honors `GSTACK_HOME`, `CLAUDE_PLUGIN_DATA`, `CLAUDE_PLANS_DIR`.
-- The `claude` CLI binary resolves via `lib/claude-bin.ts` (re-exported from `browse/src/claude-bin.ts` for browse internals; `Bun.which()` + `GSTACK_CLAUDE_BIN` override). Set `GSTACK_CLAUDE_BIN=wsl` plus `GSTACK_CLAUDE_BIN_ARGS='["claude"]'` to run Claude through WSL on Windows.
+> ChatGPT itself does not require a local slash-skill installation to discuss or operate on Ranger Stack. The slash commands below are the installed specialist interface for supported coding hosts such as Codex.
+
+## Ranger authority model
+
+Every specialist defaults to **R1 Draft** unless the operator grants another level for a defined scope.
+
+| Level | Name | Authority |
+|---|---|---|
+| **R0** | Observe | Read, inspect, search, benchmark, and run non-mutating diagnostics. |
+| **R1** | Draft | R0 plus plans, reviews, specifications, and recommendations. No project mutation. |
+| **R2** | Local Edit | R1 plus approved local file edits and validation. |
+| **R3** | Commit | R2 plus staging and local Git commits. |
+| **R4** | Publish | R3 plus branch push and PR/issue creation or updates within scope. |
+| **R5** | Operate | R4 plus specifically authorized merge, deploy, release, or external-system mutation. |
+| **R6** | One-Way | Destructive or materially irreversible actions. Each action requires individual explicit confirmation. |
+
+**Scope beats level.** R4 on one repository does not authorize publishing elsewhere. R5 to merge does not automatically authorize deployment. R6 is never inherited from blanket authority.
+
+Examples:
+
+```text
+Run /review at R1. Report only.
+```
+
+```text
+Run /qa at R2 against http://localhost:3000. Fix verified defects locally, but do not commit or push.
+```
+
+```text
+Ranger authority R4 for this mission: implement the approved issue, test it, commit it, push the branch, and open a PR. Do not merge.
+```
+
+## Governing sequence
+
+Use:
+
+**Observe → Evidence → Propose or Execute Within Authority → Verify → Escalate Only When Authority Is Exceeded**
+
+For consequential external actions:
+
+**Claim → Evidence → Human Authority → Execution → Independent Verification**
+
+Never simulate proof.
+
+## Ranger control plane
+
+| Command | Purpose |
+|---|---|
+| `/ranger` | Select the best specialist when asked, establish mission scope and authority, and enforce Ranger evidence and escalation rules. |
+
+## Ranger v0.001 active core
+
+### Planning
+
+| Invoke | Purpose |
+|---|---|
+| `/office-hours` | Product interrogation and problem reframing. |
+| `/spec` | Draft a precise implementation specification. Filing issues or spawning work requires higher authority. |
+| `/plan-ceo-review` | Challenge product scope and strategy without automatic expansion bias. |
+| `/plan-eng-review` | Review architecture, data flow, edge cases, failure modes, and test strategy. |
+
+### Engineering and verification
+
+| Invoke | Purpose |
+|---|---|
+| `/investigate` | Root-cause-first debugging. |
+| `/review` | Code review; report-only by default under Ranger. |
+| `/qa-only` | Read-only QA and defect reporting. |
+| `/qa` | QA with remediation only when R2+ authority is explicit. |
+| `/cso` | Security review and threat-oriented audit. |
+
+### Safety
+
+| Invoke | Purpose |
+|---|---|
+| `/careful` | Raise destructive-command caution. |
+| `/freeze` | Restrict edits to an approved directory or scope. |
+| `/guard` | Combine command and edit guardrails. |
+| `/unfreeze` | Remove a previously established edit freeze when authorized. |
+
+### Multi-model
+
+| Invoke | Purpose |
+|---|---|
+| `/codex` | Independent OpenAI Codex review, challenge, or consultation. |
+| `/benchmark-models` | Compare model capability/cost under TOKEN SAVER doctrine. |
+
+### Continuity
+
+| Invoke | Purpose |
+|---|---|
+| `/context-save` | Save a durable context checkpoint. |
+| `/context-restore` | Restore a prior checkpoint. |
+| `/learn` | Store project-specific lessons with provenance and confidence. |
+| `/retro` | Produce durable project/hackathon lessons learned. |
+
+### Delivery
+
+| Invoke | Purpose |
+|---|---|
+| `/ship` | Delivery workflow with commit, push, PR, merge, release, and deploy separated by authority level. |
+
+The **complete 53-skill KEEP / MODIFY / SKIP catalog and the exact invocation command for every inherited skill are in [`README.md`](README.md)**.
+
+## Evidence infrastructure
+
+Ranger also uses inherited non-slash tooling:
+
+| Tool | Ranger role |
+|---|---|
+| `gstack-context-bill` | Static context/token bill of materials. |
+| `gstack-wtree` | Worktree/source fingerprinting. |
+| `gstack-evidence` | Claim-to-evidence binding and freshness checks. |
+| `gstack-egress` | Outbound-data receipt/audit boundary. |
+| `gstack-issue-guard` | Untrusted issue/PR prompt-injection defense. |
+| `gstack-verify-gate` | Optional per-repository verification gate. |
+| `gstack-model-benchmark` | Comparable task-run evidence for TOKEN SAVER; not an automatic winner declaration. |
+
+## TOKEN SAVER rule
+
+Model selection follows:
+
+**CAPABILITY FIRST → THEN MINIMIZE COST**
+
+If the available runs are not genuinely comparable, Ranger must return:
+
+```text
+INSUFFICIENT COMPARABLE EVIDENCE
+```
+
+Do not assume the cheapest model wins. Do not assume OpenAI wins. Distinguish official/vendor pricing from third-party and self-hosted/open-weight pricing.
+
+## Competition and hackathon work
+
+Competition rules outrank workflow convenience and mission authority. Before code-changing work, establish the official event start, deadline/timezone, originality requirements, team/eligibility constraints, repository requirements, required sponsor/tool use, AI-assistance disclosures, and submission artifacts.
+
+`/retro` and `/learn` are the intended durable path for Hackathon Lessons Learned.
+
+## Compatibility note: why some Claude names still exist
+
+Ranger Stack inherits a mature multi-host codebase. Some files, environment variables, test fixtures, and compatibility adapters have **Claude-specific technical names** because upstream supports Claude Code in addition to Codex and other hosts.
+
+Examples include:
+
+- `CLAUDE.md`
+- `.claude/`
+- `CLAUDE_CONFIG_DIR`
+- `CLAUDE_PLUGIN_DATA`
+- `ANTHROPIC_API_KEY`
+- Claude-specific E2E fixtures and host adapters
+
+These names are **compatibility interfaces, not Ranger branding and not a preferred-provider statement**. They should not be mechanically renamed to `ChatGPT` because doing so could break upstream host detection, tests, paths, or provider-specific integrations.
+
+Public-facing Ranger documentation should use **ChatGPT / Codex** when referring to the OpenAI workflow, and neutral terms such as **AI agent**, **coding host**, or **model provider** when the behavior is provider-independent.
+
+## Upstream compatibility and precedence
+
+Inherited gstack files remain present where runtime/generator compatibility requires them. Presence does not imply Ranger endorsement.
+
+When inherited documentation conflicts with Ranger policy, the Ranger documents govern:
+
+- [`README.md`](README.md)
+- [`RANGER_STACK.md`](RANGER_STACK.md)
+- [`docs/ranger-stack/AUTHORITY_LADDER.md`](docs/ranger-stack/AUTHORITY_LADDER.md)
+- [`docs/ranger-stack/OPERATING_DOCTRINE.md`](docs/ranger-stack/OPERATING_DOCTRINE.md)
+- [`docs/ranger-stack/INTAKE_MANIFEST.md`](docs/ranger-stack/INTAKE_MANIFEST.md)
+- [`docs/ranger-stack/TOKEN_SAVER_INTEGRATION.md`](docs/ranger-stack/TOKEN_SAVER_INTEGRATION.md)
+
+Inherited wording such as auto-fix, automatic routing, one-command shipping, automatic memory, self-upgrade, issue filing, spawning, pushing, merging, or deploying never overrides Ranger authority.
+
+## Public-project doctrine
+
+Ranger Stack may be used as a public open-source core while private operator-specific playbooks remain outside the repository. Public code should contain reusable engineering doctrine, tests, skills, and compatibility layers—not private project strategy, credentials, personal notes, unpublished competition tactics, or identifying information that is unnecessary to operate the software.
+
+## License and attribution
+
+Ranger Stack is derived from **gstack** by Garry Tan and contributors and retains the upstream MIT license and attribution. Ranger-specific policy, documentation, setup behavior, and integration changes are maintained in this fork.
